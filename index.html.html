@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Executivo - Supermercado</title>
+    <!-- Tailwind CSS para Estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #FDFDFD; }
+        .pastel-blue { background-color: #AEC6CF; }
+        .pastel-green { background-color: #B2D8B2; }
+        .pastel-pink { background-color: #FFD1DC; }
+        .card { transition: transform 0.2s ease; }
+        .card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-700">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-8">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <i data-lucide="layout-dashboard" class="text-blue-300 w-8 h-8"></i>
+                    <h1 class="text-3xl font-bold tracking-tight text-gray-800">Dashboard Executivo</h1>
+                </div>
+                <p class="text-gray-500">Relatório de Performance - Unidade Supermercado</p>
+            </div>
+
+            <!-- Filtro -->
+            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+                <i data-lucide="filter" class="text-gray-400 w-5 h-5"></i>
+                <select id="deptFilter" class="bg-transparent border-none focus:ring-0 text-sm font-semibold cursor-pointer outline-none">
+                    <option value="Todos">Todos os Departamentos</option>
+                    <option value="Utilidades">Utilidades</option>
+                    <option value="Limpeza">Limpeza</option>
+                    <option value="Frios">Frios</option>
+                    <option value="Alimentos">Alimentos</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+            <div class="card bg-white p-8 rounded-3xl shadow-sm border-l-8 border-blue-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Faturamento Total</p>
+                    <h2 id="totalRevenue" class="text-3xl font-black text-gray-800">R$ 0,00</h2>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-2xl">
+                    <i data-lucide="dollar-sign" class="text-blue-300 w-8 h-8"></i>
+                </div>
+            </div>
+
+            <div class="card bg-white p-8 rounded-3xl shadow-sm border-l-8 border-green-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Horas Trabalhadas</p>
+                    <h2 id="totalHours" class="text-3xl font-black text-gray-800">0h</h2>
+                </div>
+                <div class="bg-green-50 p-4 rounded-2xl">
+                    <i data-lucide="clock" class="text-green-300 w-8 h-8"></i>
+                </div>
+            </div>
+
+            <div class="card bg-white p-8 rounded-3xl shadow-sm border-l-8 border-pink-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Produtos Vendidos</p>
+                    <h2 id="totalItems" class="text-3xl font-black text-gray-800">0</h2>
+                </div>
+                <div class="bg-pink-50 p-4 rounded-2xl">
+                    <i data-lucide="package" class="text-pink-300 w-8 h-8"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            
+            <!-- Evolução de Faturamento -->
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="trending-up" class="text-blue-300 w-6 h-6"></i>
+                    <h3 class="font-bold text-xl">Faturamento por Marca</h3>
+                </div>
+                <div class="h-80">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Horas por Cargo -->
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="users" class="text-green-300 w-6 h-6"></i>
+                    <h3 class="font-bold text-xl">Horas por Cargo</h3>
+                </div>
+                <div class="h-80 flex justify-center">
+                    <canvas id="rolesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Vendas Mensais -->
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-50 lg:col-span-2">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="bar-chart-3" class="text-pink-300 w-6 h-6"></i>
+                    <h3 class="font-bold text-xl">Volume de Vendas Mensal</h3>
+                </div>
+                <div class="h-96">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center text-gray-400 text-sm border-t border-gray-100 pt-10 pb-10">
+            <p>Relatório Gerado Automaticamente &bull; 2026 Sistema Supermercado</p>
+        </footer>
+    </div>
+
+    <script>
+        // Dados brutos processados do CSV
+        const rawData = [
+            { ID_Venda: 1, Data_Venda: "14/03/2026", Departamento: "Utilidades", Marca: "Marca D", Preco: 106.79, Qtd: 2, Cargo: "Caixa", Horas: 7 },
+            { ID_Venda: 2, Data_Venda: "18/01/2026", Departamento: "Limpeza", Marca: "Marca C", Preco: 33.35, Qtd: 9, Cargo: "Atendente", Horas: 7 },
+            { ID_Venda: 3, Data_Venda: "16/03/2026", Departamento: "Utilidades", Marca: "Marca C", Preco: 30.93, Qtd: 19, Cargo: "Atendente", Horas: 9 },
+            { ID_Venda: 4, Data_Venda: "02/01/2026", Departamento: "Utilidades", Marca: "Marca C", Preco: 46.18, Qtd: 2, Cargo: "Gerente", Horas: 6 },
+            { ID_Venda: 5, Data_Venda: "31/03/2026", Departamento: "Frios", Marca: "Marca B", Preco: 20.06, Qtd: 5, Cargo: "Atendente", Horas: 8 },
+            { ID_Venda: 6, Data_Venda: "14/01/2026", Departamento: "Limpeza", Marca: "Marca C", Preco: 49.11, Qtd: 23, Cargo: "Gerente", Horas: 5 },
+            { ID_Venda: 7, Data_Venda: "10/02/2026", Departamento: "Alimentos", Marca: "Marca A", Preco: 15.50, Qtd: 10, Cargo: "Repositor", Horas: 8 },
+            { ID_Venda: 8, Data_Venda: "12/02/2026", Departamento: "Bebidas", Marca: "Marca B", Preco: 25.00, Qtd: 15, Cargo: "Caixa", Horas: 6 },
+            { ID_Venda: 9, Data_Venda: "05/03/2026", Departamento: "Padaria", Marca: "Marca D", Preco: 5.90, Qtd: 30, Cargo: "Atendente", Horas: 7 },
+            { ID_Venda: 10, Data_Venda: "20/03/2026", Departamento: "Frios", Marca: "Marca A", Preco: 42.00, Qtd: 8, Cargo: "Repositor", Horas: 8 },
+            { ID_Venda: 11, Data_Venda: "22/01/2026", Departamento: "Limpeza", Marca: "Marca B", Preco: 12.00, Qtd: 4, Cargo: "Caixa", Horas: 6 },
+            { ID_Venda: 12, Data_Venda: "15/02/2026", Departamento: "Utilidades", Marca: "Marca C", Preco: 88.00, Qtd: 3, Cargo: "Gerente", Horas: 8 },
+        ];
+
+        let charts = {};
+
+        function updateDashboard(dept) {
+            const filtered = dept === "Todos" ? rawData : rawData.filter(d => d.Departamento === dept);
+            
+            // Cálculos
+            const totalRevenue = filtered.reduce((acc, curr) => acc + (curr.Preco * curr.Qtd), 0);
+            const totalHours = filtered.reduce((acc, curr) => acc + curr.Horas, 0);
+            const totalItems = filtered.reduce((acc, curr) => acc + curr.Qtd, 0);
+
+            // Update KPIs
+            document.getElementById('totalRevenue').innerText = totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('totalHours').innerText = totalHours + 'h';
+            document.getElementById('totalItems').innerText = totalItems.toLocaleString('pt-BR');
+
+            // Preparar Gráficos
+            const brandsData = {};
+            const rolesData = {};
+            const monthsData = {};
+
+            filtered.forEach(d => {
+                brandsData[d.Marca] = (brandsData[d.Marca] || 0) + (d.Preco * d.Qtd);
+                rolesData[d.Cargo] = (rolesData[d.Cargo] || 0) + d.Horas;
+                const month = d.Data_Venda.split('/')[1] + '/26';
+                monthsData[month] = (monthsData[month] || 0) + d.Qtd;
+            });
+
+            renderCharts(brandsData, rolesData, monthsData);
+        }
+
+        function renderCharts(brands, roles, months) {
+            const pastelColors = ['#AEC6CF', '#B2D8B2', '#FFD1DC', '#FAFAC6', '#CFCFC4'];
+
+            // Destroy existing charts if any
+            if (charts.revenue) charts.revenue.destroy();
+            if (charts.roles) charts.roles.destroy();
+            if (charts.monthly) charts.monthly.destroy();
+
+            // Gráfico de Área (Faturamento por Marca)
+            charts.revenue = new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: Object.keys(brands),
+                    datasets: [{
+                        label: 'Faturamento R$',
+                        data: Object.values(brands),
+                        backgroundColor: 'rgba(174, 198, 207, 0.4)',
+                        borderColor: '#AEC6CF',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Gráfico de Pizza (Horas por Cargo)
+            charts.roles = new Chart(document.getElementById('rolesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(roles),
+                    datasets: [{
+                        data: Object.values(roles),
+                        backgroundColor: pastelColors
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
+            });
+
+            // Gráfico de Barras (Vendas Mensais)
+            charts.monthly = new Chart(document.getElementById('monthlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(months).sort(),
+                    datasets: [{
+                        label: 'Itens Vendidos',
+                        data: Object.values(months),
+                        backgroundColor: '#FFD1DC',
+                        borderRadius: 10
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            updateDashboard("Todos");
+            
+            document.getElementById('deptFilter').addEventListener('change', (e) => {
+                updateDashboard(e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>
